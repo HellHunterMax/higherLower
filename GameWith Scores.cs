@@ -5,10 +5,15 @@ namespace gameWithScores
 {
 	class mainMenu
 	{
+		const string FilePath = @".\Scores.txt";
 		public static void Main()
 		{
 			string choice = "";
 			bool exitGame = false;
+			FileInfo fileInf = new FileInfo(FilePath);
+			
+			if (!fileInf.Exists)
+				File.Create(FilePath).Dispose();
 			
 			while (!exitGame)
 			{
@@ -99,7 +104,12 @@ namespace gameWithScores
 		}
 		public static void Scores()
 		{
-			Console.WriteLine("Scores!");
+			Console.Clear();
+			using (var reader = new StreamReader(new FileStream(FilePath, FileMode.Open)))
+			{
+				Console.WriteLine(reader.ReadToEnd());
+			}
+			Console.WriteLine("Enter to continue");
 			Console.ReadKey();
 		}
 	}
