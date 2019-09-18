@@ -21,10 +21,10 @@ namespace gameWithScores
 				Console.WriteLine("Type play to play a game.");
 				Console.WriteLine("Type scores to see the scores.");
 				Console.WriteLine("Type exit to quit.");
-				while (choice.ToLower() != "play" && choice.ToLower() != "scores" && choice.ToLower() != "exit")
+				while (choice != "play" && choice != "scores" && choice != "exit")
 				{	
 					Console.Write("play, scores or exit: ");
-					choice = Console.ReadLine();
+					choice = Console.ReadLine().ToLower();
 				}
 					
 				if (choice.ToLower() == "exit")
@@ -99,7 +99,17 @@ namespace gameWithScores
 					keepPlaying = false;
 				
 				
+			}		
+			Console.Clear();
+			Console.WriteLine("I will check if you hit the highscore");
+			while (playerName.Length < 2 || playerName.Length > 10)
+			{	
+				Console.WriteLine("I need a name between 2 and 10 letters: ");
+				playerName = Console.ReadLine();
 			}
+			
+			HighScore(points, playerName);
+			//TODO: call HighScore method.		
 			
 		}
 		public static void Scores()
@@ -110,6 +120,69 @@ namespace gameWithScores
 				Console.WriteLine(reader.ReadToEnd());
 			}
 			Console.WriteLine("Enter to continue");
+			Console.ReadKey();
+		}
+		public static void HighScore(int score,  string name)
+		{
+			Console.Clear();
+			int highScorePosition = 11;
+			System.Collections.Generic.List<string> newScoreBoardList = new System.Collections.Generic.List<string>();
+			
+			using (var reader = new StreamReader(new FileStream(FilePath, FileMode.Open)))
+			{
+				string scoreBoard = reader.ReadToEnd();
+				string[] scoreLine = scoreBoard.Split(new[] { Environment.NewLine },StringSplitOptions.None);
+				
+				for (int position = 0; position < scoreLine.Length; position++)
+				{
+					string[] scoreAndName = scoreLine[position].Split(' ');
+					if (score > int.Parse(scoreAndName[0]))
+					{
+						highScorePosition = position+1;
+						break;
+					}
+					if (position == scoreLine.Length -1)
+					{
+						highScorePosition = position;
+					}
+				}
+				
+				for (int position = 0; position < scoreLine.Length+1; position++)
+				{
+					if ( position == 10)
+						break;
+					else if (highScorePosition == position)
+					{
+						newScoreBoardList.Add(score + " " + name);
+					}
+					else if (highScorePosition < position)
+					{
+						string[] scoreAndName = scoreLine[position-1].Split(' ');
+						newScoreBoardList.Add(scoreAndName[0] + " " + scoreAndName[1]);
+					}
+					else
+					{
+						string[] scoreAndName = scoreLine[position].Split(' ');
+						newScoreBoardList.Add(scoreAndName[0] + " " + scoreAndName[1]);
+					}
+				}
+			}
+			
+			if (highScorePosition >9)
+				Console.WriteLine("With " + score + " you did not make the highscore. try again!");
+			else
+			{
+				Console.WriteLine("Congratulations you made the highscore with " + score + " points!");
+				Console.WriteLine("You are on position " + (highScorePosition-1) + "!" );
+			}
+			using (var writer = new StreamWriter(new FileStream(FilePath, FileMode.Create)))
+			{
+				for ( int i = 0; i < newScoreBoardList.Count ; i++)
+				{
+					writer.WriteLine(newScoreBoardList[i]);
+				}
+			}
+			Console.Write("Press Enter to Continue.");
 			Console.ReadKey();
 		}
 	}
