@@ -78,13 +78,14 @@ namespace gameWithScores
 				if ((higherLower == "lower" && playerCard > PCCard)|| (higherLower == "higher" && playerCard < PCCard))
 				{
 					points++;
-					Console.WriteLine("You had card number "+ playerCard+ " and the PC had card number " + PCCard + " and you said " + higherLower);
+					Console.WriteLine("You had card number "+ playerCard+ " and the PC had card number " + PCCard + " and you said " + higherLower + ".");
 					Console.WriteLine("So you gaind a point!");
 					Console.WriteLine("You now have " + points + " points."); 
 				}
 				else
 				{
 					points--;
+					Console.WriteLine("You had card number "+ playerCard+ " and the PC had card number " + PCCard + " and you said " + higherLower + ".");
 					Console.WriteLine("So you lost a point!");
 					Console.WriteLine("You now have " + points + " points."); 
 				}
@@ -108,8 +109,7 @@ namespace gameWithScores
 				playerName = Console.ReadLine();
 			}
 			
-			HighScore(points, playerName);
-			//TODO: call HighScore method.		
+			HighScore(points, playerName);		
 			
 		}
 		public static void Scores()
@@ -132,22 +132,28 @@ namespace gameWithScores
 			{
 				string scoreBoard = reader.ReadToEnd();
 				string[] scoreLine = scoreBoard.Split(new[] { Environment.NewLine },StringSplitOptions.None);
-				
+				bool lineWasEmpty = false;
 				for (int position = 0; position < scoreLine.Length; position++)
 				{
 					string[] scoreAndName = scoreLine[position].Split(' ');
-					if (score > int.Parse(scoreAndName[0]))
-					{
-						highScorePosition = position+1;
-						break;
-					}
-					if (position == scoreLine.Length -1)
+					if (string.IsNullOrEmpty(scoreAndName[0]))
 					{
 						highScorePosition = position;
+						lineWasEmpty = true;
+						break;
+					}
+					else if (score > int.Parse(scoreAndName[0]))
+					{
+						highScorePosition = position;
+						break;
+					}
+					else if (position == scoreLine.Length-1)
+					{
+						highScorePosition = position+1;
 					}
 				}
 				
-				for (int position = 0; position < scoreLine.Length+1; position++)
+				for (int position = 0; position < scoreLine.Length+1; position++)// bug here if new file then scorelinelength is not +1
 				{
 					if ( position == 10)
 						break;
@@ -155,12 +161,14 @@ namespace gameWithScores
 					{
 						newScoreBoardList.Add(score + " " + name);
 					}
-					else if (highScorePosition < position)
+					else if (position-1 > -1 && highScorePosition < position && !lineWasEmpty)
 					{
 						string[] scoreAndName = scoreLine[position-1].Split(' ');
+						if (scoreAndName.Length <2)
+							continue;
 						newScoreBoardList.Add(scoreAndName[0] + " " + scoreAndName[1]);
 					}
-					else
+					else if(highScorePosition >= position && !lineWasEmpty)
 					{
 						string[] scoreAndName = scoreLine[position].Split(' ');
 						newScoreBoardList.Add(scoreAndName[0] + " " + scoreAndName[1]);
@@ -169,16 +177,17 @@ namespace gameWithScores
 			}
 			
 			if (highScorePosition >9)
-				Console.WriteLine("With " + score + " you did not make the highscore. try again!");
+				Console.WriteLine("With " + score + " points, you did not make the highscore. try again!");
 			else
 			{
 				Console.WriteLine("Congratulations you made the highscore with " + score + " points!");
-				Console.WriteLine("You are on position " + (highScorePosition-1) + "!" );
+				Console.WriteLine("You are on position " + (highScorePosition+1) + "!" );
 			}
 			using (var writer = new StreamWriter(new FileStream(FilePath, FileMode.Create)))
 			{
 				for ( int i = 0; i < newScoreBoardList.Count ; i++)
 				{
+					
 					writer.WriteLine(newScoreBoardList[i]);
 				}
 			}
